@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sensingclues"
+authors = [
+    {name = "sensing_clues", email = "sensingclues@typemail.com"},
+]
+version = "0.2.2"
+description = "Python client to extract data from SensingClues"
+readme = "readme.md"
+requires-python = ">=3.9"
+keywords = ["wildlife", "SensingClues", "Cluey"]
+license = {text = "MIT"}
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dynamic = ["dependencies", "optional-dependencies"]
+
+[project.urls]
+Homepage = "https://sensingcluespy.readthedocs.io/en/latest/index.html"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies.dev = { file = ["requirements_dev.txt"] }
+
+[tool.setuptools.package-data]
+sensingclues = ["extractors/*"]
+
+[tool.setuptools.packages.find]
+include = ["sensingclues*"]
+exclude = ["docs/*", "tests/*", "notebooks/*"]
+
+[tool.black]
+line-length = 80
+# Exclude everything in the .gitignore, but also:
+extend-exclude = '''
+/(
+    notebooks
+    | docs
+)/
+'''
+
+[tool.isort]
+profile = "black"
+
+[tool.bumpver]
+current_version = "0.2.2"
+version_pattern = "MAJOR.MINOR.PATCH[-TAG]"
+commit_message = "bump version {old_version} -> {new_version}"
+tag_message = "{new_version}"
+tag_scope = "default"
+pre_commit_hook = ""
+post_commit_hook = ""
+commit = true
+tag = true
+push = true
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'current_version = "{version}"',
+    'version = "{version}"',
+]
+"docs/conf.py" = [
+    'release = "{version}"',
+]
+
+

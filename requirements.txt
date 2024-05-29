@@ -1,0 +1,5 @@
+geojson
+geopandas
+pandas
+python-dotenv
+requests
