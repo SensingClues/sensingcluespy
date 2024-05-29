@@ -1,0 +1,41 @@
+{
+  "cols_to_data": ["features"],
+  "extractor": {
+    "extract_values": [
+      "type",
+      "id"
+    ],
+    "geometry": {
+      "extract_values": [
+        "type",
+        "coordinates"
+      ]
+    },
+     "properties": {
+       "extract_values": [
+         "DocId",
+         "ShortId",
+         "OBJECTID",
+         "EntityId",
+         "Id",
+         "name",
+         "NAME",
+         "Names",
+         "city",
+         "country",
+         "province",         
+         "Shape_Leng",
+         "Shape_Area",
+         "name_2",
+         "shape_le_1",
+         "shape_ar_1",
+         "id_2",
+         "Area",
+         "Acre",
+         "Hectare",
+         "shape_le_2",
+         "shape_ar_2"
+       ]
+     }
+  }
+}
