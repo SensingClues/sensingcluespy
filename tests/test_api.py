@@ -7,12 +7,12 @@
 # from unittest.mock import Mock, patch
 #
 #
-# from sensingclues import api_calls
-# from sensingclues.api_calls import SensingClues
+# from sensingcluespy import api_calls
+# from sensingcluespy.api_calls import SensingClues
 # from dotenv import load_dotenv
 
 
-# @patch('sensingclues.api_calls.SensingClues.login')
+# @patch('sensingcluespy.api_calls.SensingClues.login')
 # def test_login(mock_get):
 #     # Configure the mock to return a response with an OK status code.
 #     mock_get.response.status_code = 200

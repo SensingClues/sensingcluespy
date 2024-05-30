@@ -4,7 +4,7 @@ from typing import List
 
 import pkg_resources
 
-data_path = pkg_resources.resource_filename("sensingclues", "extractors/")
+data_path = pkg_resources.resource_filename("sensingcluespy", "extractors/")
 
 
 def flatten_list(nested_list: list) -> list:

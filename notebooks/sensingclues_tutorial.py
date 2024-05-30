@@ -4,8 +4,8 @@
 #     text_representation:
 #       extension: .py
 #       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.16.2
+#       format_version: '1.4'
+#       jupytext_version: 1.2.0
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -15,16 +15,17 @@
 # # Extract wildlife observation data with SensingClues
 #
 # [SensingClues](https://sensingclues.org/) allows you to record, monitor and analyze wildlife observations to support nature conservation initiatives. This notebook shows the following:
+#
 # - **Basic**: the main SensingClues-functionality of **extracting observation and track data**. 
 # - **Advanced**: this section includes the usage of a hierarchy of available concepts (e.g. animal species or type of activity), which enhances reporting and analysis of the observation data. Further, we show how to collect and visualize layer data from SensingClues.
 #
-# You can adapt this notebook to extract your own recordings. For more detail on what you can configure as a user, see the API-documentation of the `sensingclues`-package.
+# You can adapt this notebook to extract your own recordings. For more detail on what you can configure as a user, see the API-documentation of the `sensingcluespy`-package.
 #
 # ### Before you start
 #
 # To run this notebook, you should:
 # - create a personal account at SensingClues using the Cluey Data Collector app, which can be downloaded from the Google Playstore (not supported for iOS currently). Also see [here](https://sensingclues.org/portal).
-# - install the `sensingclues`-package in a virtual python environment (`pip install -e .` from the main directory of the repository).
+# - install the `sensingcluespy`-package in a virtual python environment (`pip install -e .` from the main directory of the repository).
 # - install the requirements in requirements.txt (if not already installed automatically in the previous step).
 # - create a file '.env' in the root of the wildcat-api-python-repository, containing your SensingClues credentials. These will be read in this notebook to log in. The file should look like this:
 # ```
@@ -39,9 +40,9 @@ import os
 
 from dotenv import load_dotenv
 
-from sensingclues import sclogging
-from sensingclues.api_calls import SensingClues
-from sensingclues.src import helper_functions as helpers
+from sensingcluespy import sclogging
+from sensingcluespy.api_calls import SensingClues
+from sensingcluespy.src import helper_functions as helpers
 
 logger = sclogging.get_sc_logger()
 sclogging.set_sc_log_level("DEBUG")
@@ -191,6 +192,7 @@ hierarchy.loc[hierarchy["id"].isin(children_label)]
 # - Further, if you want to exclude subconcepts, i.e. keep observations with the label 'animal' but exclude observations with the label 'elephant', set `include_subconcepts=False`.
 #
 
+# +
 concept_animal = [
     "https://sensingclues.poolparty.biz/SCCSSOntology/308", # Impala
     "https://sensingclues.poolparty.biz/SCCSSOntology/319", # Giraffe    
@@ -204,6 +206,7 @@ observations = sensing_clues.get_observations(
     concepts=concept_animal,
     coord={"north": 32, "east": 20, "south": 31.5, "west": 10}
 )
+# -
 
 observations.head()
 
