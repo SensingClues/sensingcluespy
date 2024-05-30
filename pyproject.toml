@@ -7,7 +7,7 @@ name = "sensingcluespy"
 authors = [
     {name = "sensing_clues", email = "sensingclues@typemail.com"},
 ]
-version = "0.2.2"
+version = "0.2.3"
 description = "Python client to extract data from SensingClues"
 readme = "readme.md"
 requires-python = ">=3.9"
@@ -48,7 +48,7 @@ extend-exclude = '''
 profile = "black"
 
 [tool.bumpver]
-current_version = "0.2.2"
+current_version = "0.2.3"
 version_pattern = "MAJOR.MINOR.PATCH[-TAG]"
 commit_message = "bump version {old_version} -> {new_version}"
 tag_message = "{new_version}"
