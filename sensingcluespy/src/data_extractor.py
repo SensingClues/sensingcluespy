@@ -1,16 +1,16 @@
 """Extracts specific elements from the SensingClues data.
 The elements to extract are specified in local JSON files,
-located in ``/sensingclues/extractors/``."""
+located in ``/sensingcluespy/extractors/``."""
 
 import json
 from typing import List, Union
 
 import pkg_resources
 
-from sensingclues.src.data_cleaner import flatten_list
-from sensingclues.src.helper_functions import recursive_get_from_dict
+from sensingcluespy.src.data_cleaner import flatten_list
+from sensingcluespy.src.helper_functions import recursive_get_from_dict
 
-data_path = pkg_resources.resource_filename("sensingclues", "extractors/")
+data_path = pkg_resources.resource_filename("sensingcluespy", "extractors/")
 
 DEFAULT_EXTRACTION_TYPES = [
     "extract_values",
@@ -22,7 +22,7 @@ class DataExtractor(object):
     """Extract specific elements from raw data returned by calls to Focus.
 
     The elements to extract are specified in local JSON files, located in
-    /sensingclues/extractors/. Usage of these extractor-jsons
+    /sensingcluespy/extractors/. Usage of these extractor-jsons
     makes it easier to add your own method to the API and extract specific
     elements, without modifying this DataExtractor-class.
 
@@ -34,7 +34,7 @@ class DataExtractor(object):
     def __init__(self, extractor_name: str):
         """Read and process extractor configuration
 
-        Extractor configurations should be located in sensingclues/extractors/.
+        Extractor configurations should be located in sensingcluespy/extractors/.
 
         :param extractor_name: Name of extractor configuration to use.
         """

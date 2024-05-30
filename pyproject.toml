@@ -3,7 +3,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sensingclues"
+name = "sensingcluespy"
 authors = [
     {name = "sensing_clues", email = "sensingclues@typemail.com"},
 ]

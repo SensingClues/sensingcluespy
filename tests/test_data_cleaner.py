@@ -4,7 +4,7 @@ import unittest
 
 import pytest
 
-from sensingclues.src import flatten_list, get_list_values, select_columns
+from sensingcluespy.src import flatten_list, get_list_values, select_columns
 
 
 @pytest.mark.data_cleaner

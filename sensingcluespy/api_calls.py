@@ -10,9 +10,9 @@ import numpy as np
 import pandas as pd
 import requests
 
-from sensingclues import sclogging
-from sensingclues.src import DataExtractor, align_extractor, make_query
-from sensingclues.src.exceptions import (
+from sensingcluespy import sclogging
+from sensingcluespy.src import DataExtractor, align_extractor, make_query
+from sensingcluespy.src.exceptions import (
     SCClientNotFoundError, SCPermissionDenied, SCServiceUnavailable,
 )
 
