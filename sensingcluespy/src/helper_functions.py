@@ -321,6 +321,7 @@ def recursive_get_from_dict(nested_dict: dict, keys: list) -> Any:
     :returns: Value for deepest level in dictionary, or a call
         to this same function if the deepest level has not yet been reached.
     """
+
     head, *tail = keys
     if tail:
         return recursive_get_from_dict(nested_dict[head], tail)

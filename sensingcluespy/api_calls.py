@@ -5,7 +5,7 @@ import math
 import warnings
 from typing import List, Union
 
-import geopandas
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import requests
@@ -94,7 +94,7 @@ class SensingClues(object):
         groups: Union[str, List],
         include_subconcepts: bool = True,
         **kwargs,
-    ) -> pd.DataFrame:
+    ) -> gpd.GeoDataFrame:
         """Method to acquire observations data from SensingClues Focus
 
         Extra (filter) arguments can be passed to this method via kwargs.
@@ -131,6 +131,16 @@ class SensingClues(object):
                 obs = obs.loc[obs["conceptId"] == concepts]
 
         obs = obs.rename(columns=col_trans)
+
+        obs["lon"] = obs["where"].apply(lambda x: x["coordinates"][0])
+        obs["lat"] = obs["where"].apply(lambda x: x["coordinates"][1])
+
+        obs = gpd.GeoDataFrame(
+            obs,
+            geometry=gpd.points_from_xy(obs["lon"], obs["lat"]),
+            crs="EPSG:4326"
+        )
+        
         return obs
 
     def get_tracks(
@@ -175,7 +185,7 @@ class SensingClues(object):
     def add_geojson_to_tracks(
         self,
         tracks: pd.DataFrame,
-    ) -> pd.DataFrame:
+    ) -> gpd.GeoDataFrame:
         """Add geojson data to track data
 
         For each unique track, extract geojson data
@@ -198,7 +208,7 @@ class SensingClues(object):
         for i, entity in enumerate(track_entities):
             payload = make_query(query_text=f"entityId:'{entity}'")
             req = self._api_call("post", url_addition, payload)
-            df_entity = geopandas.read_file(io.BytesIO(req.content))
+            df_entity = gpd.read_file(io.BytesIO(req.content))
             if not df_entity.empty:
                 logger.debug(f"Found geojson data for track {entity}.")
             else:
@@ -210,7 +220,9 @@ class SensingClues(object):
 
         tracks = tracks.merge(df, how="left", on="entityId")
 
-        return tracks
+        tracks_geo = gpd.GeoDataFrame(tracks, geometry=tracks["geometry"], crs="EPSG:4326")
+
+        return tracks_geo
 
     def get_all_layers(self, exclude_pids: list = None) -> pd.DataFrame:
         """Get layers to which the user has access
@@ -253,7 +265,7 @@ class SensingClues(object):
         project_id: int = None,
         layer_id: int = None,
         exclude_pids: list = None,
-    ) -> geopandas.GeoDataFrame:
+    ) -> gpd.GeoDataFrame:
         """Extract details for a specific layer
 
         :param layer_name: Name of project to extract layer features for.
@@ -263,7 +275,7 @@ class SensingClues(object):
         :param exclude_pids: List of pids to exclude, in addition to
             ['track', 'default'], which are always excluded. Default is None.
 
-        :returns: geopandas.DataFrame with features of the requested layer.
+        :returns: gpd.DataFrame with features of the requested layer.
 
         """
         all_layers = self.get_all_layers(exclude_pids=exclude_pids)
@@ -290,8 +302,8 @@ class SensingClues(object):
         url_addition = f"map/all/{project_id}/{layer_id}/features/"
         req = self._api_call("post", url_addition)
 
-        # relevant geometry information can be read using geopandas
-        gdf = geopandas.read_file(io.BytesIO(req.content))
+        # relevant geometry information can be read using gpd
+        gdf = gpd.read_file(io.BytesIO(req.content))
 
         # TODO:
         #  some layers have additional columns, so implement option to extract
@@ -439,6 +451,8 @@ class SensingClues(object):
     ) -> pd.DataFrame:
         """Make iterative calls to SensingClues Focus API to collect data
 
+        Calls are made per member group in groups.
+
         :param groups: Name(s) of groups to query from, passed as a string
             or as a list of strings, e.g. "focus-project-1234".
         :param extractor_name: Name of extractor configuration to use.
@@ -453,39 +467,75 @@ class SensingClues(object):
         output_data = []
         extractor = DataExtractor(extractor_name)
 
-        # first, determine number of available records.
-        query = make_query(groups=groups, page_length=page_length, **kwargs)
+        # determine total number of available records (without filters)
+        query = make_query(
+            groups=groups,
+            page_length=page_length,
+            # page_nbr=1,
+        )
         req = self._api_call("post", "search/all/results", query)
-        nbr_pages = math.ceil(req.json()["total"] / page_length)
-        nbr_pages_decile = math.ceil(nbr_pages / 10)
+        n_records_all = req.json()['total']
         logger.info(
-            f"Scope '{groups}' contains {req.json()['total']} entities"
-            f" for data type '{extractor_name}'."
+            f"Scope {groups} contains {n_records_all} records for" 
+            f" data type '{extractor_name}', when not applying any filters."
         )
 
-        if page_nbr_sample:
-            nbr_pages = page_nbr_sample
-            logger.info(
-                f"Restricting number of pages to a sample of {nbr_pages}."
-            )
+        # determine total number of available records (with filters)
+        query = make_query(
+            groups=groups,
+            page_length=page_length,
+            page_nbr=1,
+            **kwargs,
+        )
+        req = self._api_call("post", "search/all/results", query)
+        n_records = req.json()['total']
+        logger.info(
+            f"When applying your filters, {n_records} records remain."
+        )
 
-        # second, verify extractor definition is correct for this particular
-        # group by using the first record in the query results.
-        if req.json()["total"] > 0:
-            # content of the first record in query results
+        df = pd.DataFrame()
+        for group in groups:
+            query = make_query(
+                groups=group,
+                page_length=page_length,
+                **kwargs,
+            )
+            req = self._api_call("post", "search/all/results", query)
+            n_records_group = req.json()['total']
+            nbr_pages = math.ceil(n_records_group / page_length)
+            nbr_pages_decile = math.ceil(nbr_pages / 10)
+            if n_records_group == 0:
+                logger.warning(
+                    f"No data available for '{extractor_name}',"
+                    f" returning empty dataframe for group {group}."
+                )
+                df = pd.concat(
+                    [df, pd.DataFrame()], axis=0, ignore_index=True
+                )
+                continue
+
+            if page_nbr_sample:
+                nbr_pages = np.min([nbr_pages, page_nbr_sample])
+                logger.debug(
+                    f"page_nbr_sample set to {page_nbr_sample},"
+                    f" restricting number of pages for group {group}."
+                )
+
+            # verify extractor definition is correct for each
+            # group by using the first record in the query results.
             record_content = req.json()["results"][0]["extracted"]["content"]
             ext_clean_o = align_extractor(extractor.ext_clean, record_content)
             extractor.ext_clean = ext_clean_o
 
             # extract the data
-            logger.info("Started reading available records.")
+            logger.info(f"Started  reading available records for group {group}.")
             for i_page in range(nbr_pages):
                 if np.mod(i_page, nbr_pages_decile) == 0:
-                    logger.info(
+                    logger.debug(
                         f"Reading page {i_page:>3d} out of {nbr_pages} pages."
                     )
                 query = make_query(
-                    groups=groups,
+                    groups=group,
                     page_length=page_length,
                     page_nbr=i_page,
                     **kwargs,
@@ -493,12 +543,11 @@ class SensingClues(object):
                 req = self._api_call("post", "search/all/results", query)
                 data = extractor.extract_data(req.json())
                 output_data.extend(data)
-            logger.info("Finished reading available records.")
-        else:
-            logger.warning(
-                f"No data available for '{extractor_name}',"
-                " returning empty dataframe."
+
+            df_group = pd.DataFrame(output_data)
+            df = pd.concat([df, df_group], axis=0, ignore_index=True)
+            logger.info(
+                f"Finished reading available records for group {group}."
             )
 
-        df = pd.DataFrame(output_data)
         return df

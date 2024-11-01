@@ -2,8 +2,10 @@ autopep8
 black
 bump2version
 flake8
-jupyterlab
+folium==0.16.0
+jupyterlab==4.2.5
 jupytext
+matplotlib==3.9.0
 mypy
 pip
 pre-commit
