@@ -29,8 +29,7 @@
 #
 # To run this notebook, you should:
 # - Install the `sensingcluespy`-package in a virtual python environment (`pip install -e .` from the main directory of the repository).
-# - Install the requirements in requirements.txt (if not already installed automatically in the previous step).
-#   Install the requirements in requirements_dev.txt to create the plots in this notebook using the `matplotlib` and `folium`-packages (if not already installed automatically in the previous step).
+# - Install the requirements in requirements.txt (if not already installed automatically in the previous step). This includes the plotting libraries `matplotlib` and `folium` used in this notebook.
 #
 # #### [Optional] Create your own user account
 #
@@ -47,7 +46,7 @@
 
 # +
 # N.B. While sensingcluespy does not require you to install visualization packages, this tutorial does.
-# To run this tutorial in full, please install matplotlib and folium (as contained in requirements_dev.txt).
+# To run this tutorial in full, please install matplotlib and folium (as contained in requirements.txt).
 import folium
 import geopandas as gpd
 import matplotlib.pyplot as plt
@@ -290,8 +289,6 @@ layers
 
 layer = sensing_clues.get_layer_features(layer_name="Demo_countries")
 viz.plot_layer(layer)
-
-viz.plot_layers(layer)
 
 # ### Miscellaneous
 
