@@ -6,4 +6,4 @@ jupytext==1.16.4
 matplotlib==3.9.0
 pandas==1.5.1
 python-dotenv==0.21.0
-requests==2.23.2
+requests==2.32.3
