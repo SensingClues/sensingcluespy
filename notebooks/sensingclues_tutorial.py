@@ -57,6 +57,7 @@ from dotenv import load_dotenv
 from sensingcluespy import sclogging
 from sensingcluespy.api_calls import SensingClues
 from sensingcluespy.src import helper_functions as helpers
+from sensingcluespy.src import visualization as viz
 # -
 
 plt.style.use("ggplot")
@@ -127,102 +128,19 @@ observations = sensing_clues.get_observations(
 )
 
 # #### Visualize these observations
+#
+# The standard plotting-function `plot_observation` shows a separate layer for all observation types (typically ['community_work', 'animal', 'community', 'poi', 'hwc'], where 'poi' = 'point of interest' and 'hwc' = 'human-wildlife-conflict').
 
-observations[["entityType", "observationType"]].value_counts()
+viz.plot_observations(
+    observations, 
+    show_heatmap="hwc_animal", 
+    padding=(25, 25)
+)
 
-observations.loc[observations["observationType"] == "animal", "conceptLabel"].value_counts()
-
-observations["observationType"].unique().tolist()
-
-# +
-from folium.plugins import HeatMap
-
-show_heatmap = "all"
-
-poly_map = folium.Map(tiles="cartodbpositron")
-
-
-feature_groups = {
-    "community_work": folium.FeatureGroup(name='Community'),
-    "community": folium.FeatureGroup(name='Community'),
-    "animal": folium.FeatureGroup(name='Animal sighting'),
-    "hwc": folium.FeatureGroup(name='Human-wildlife-conflict'),
-    "poi": folium.FeatureGroup(name='Point of interest'),
-}
-
-for _, obs in observations.iterrows():
-    obs_type = obs["observationType"]
-    if obs_type == "animal":
-        icon_fmt = {
-            "icon": "fa-paw",
-            "color": "orange",
-        }
-    elif obs_type in ["community", "community_work"]:
-        icon_fmt = {
-            "icon": "fa-people-group",
-            "color": "darkblue",
-        }        
-    elif obs_type == "hwc":
-        icon_fmt = {
-            "icon": "fa-triangle-exclamation",
-            "color": "red"
-        }      
-    elif obs["observationType"] == "poi":
-        icon_fmt = {
-            "icon": "fa-leaf",
-            "color": "darkgreen",
-        }      
-    else:
-        icon_fmt = {
-            "icon": None,
-            "color": "blue",
-        }
-
-    folium.Marker(
-        [obs["geometry"].y, obs["geometry"].x], 
-        obs["conceptLabel"], 
-        icon=folium.Icon(**icon_fmt, prefix='fa')
-    ).add_to(feature_groups[obs_type])
-
-if show_heatmap == "all":
-    # add heatmap for observations of all types
-    lat_lon = observations["geometry"].apply(lambda geom: [geom.y, geom.x])
-    hm = HeatMap(lat_lon, name="Heatmap").add_to(folium.FeatureGroup())
-    poly_map.add_child(hm)
-elif show_heatmap == "hwc_animal":
-    # add heatmap for observations of type human-wildlife conflict ("hwc")
-    lat_lon_hwc = observations.loc[
-    observations["observationType"] == "hwc", "geometry"
-    ].apply(lambda geom: [geom.y, geom.x])
-    hm_hwc = HeatMap(
-        lat_lon_hwc, 
-        name="HWC heatmap",
-        gradient={0.4: 'brown', 0.65: 'orange', 1: 'red'},
-    ).add_to(folium.FeatureGroup())
-    poly_map.add_child(hm_hwc)
-    
-    # add heatmap for observations of "animal"
-    lat_lon_animal = observations.loc[
-    observations["observationType"] == "animal", "geometry"
-    ].apply(lambda geom: [geom.y, geom.x])
-    hm_animal = HeatMap(
-        lat_lon_animal,
-        name="Animal heatmap",
-        gradient={0.4: 'blue', 0.65: 'lime', 1: 'green'}
-    ).add_to(folium.FeatureGroup())
-    poly_map.add_child(hm_animal)
-else:
-    # Do not show any heatmap
-    pass
-
-for fg in feature_groups.values():
-    poly_map.add_child(fg)
-
-folium.LatLngPopup().add_to(poly_map)
-poly_map.fit_bounds(poly_map.get_bounds())
-poly_map.add_child(folium.map.LayerControl(collapsed=False))
-poly_map
-# -
+# You can explore the observations per observationType like so:
+observation_type = "animal"
+# observation_type = "hwc"
+observations.loc[observations["observationType"] == observation_type, "conceptLabel"].value_counts()
 
 # ### Get tracks
 #
@@ -236,30 +154,14 @@ tracks = sensing_clues.get_tracks(
 
 tracks.head()
 
-# #### Add geosjon-data to tracks
+# #### Visualize tracks
 #
-# If available, you can add geojson-data (including geometries) to the tracks.
+# If available, you can add geojson-data (including geometries) to the tracks and subsequently visualize the tracks.
 
 tracks_geo = sensing_clues.add_geojson_to_tracks(tracks)
 
-world = gpd.read_file(gpd.datasets.get_path("naturalearth_lowres"))
-ax = world.clip([25.7, -17.9, 25.9, -17.75]).plot(
-    color="lightgray",
-    edgecolor="black",
-    alpha=0.5,
-)
-tracks_geo.plot(ax=ax, column="entityId", marker=".")
-plt.xlabel("Longitude")
-plt.ylabel("Latitude")
-plt.title("Example of track data")
-plt.show()
-
-poly_map = folium.Map(tiles="cartodbpositron")
-for _, geometry in tracks_geo["geometry"].items():
-    folium.GeoJson(geometry).add_to(poly_map)
-folium.LatLngPopup().add_to(poly_map)
-poly_map.fit_bounds(poly_map.get_bounds())
-poly_map
+track_map = viz.plot_tracks(tracks_geo["geometry"])
+track_map
 
 # ## Advanced functionality
 
@@ -382,22 +284,14 @@ if not concept_counts.empty:
 layers = sensing_clues.get_all_layers()
 layers
 
-# ### Get details for an individual layer
+# ### Visualize an individual layer
+#
+# Get features for an individual and visualize it.
 
 layer = sensing_clues.get_layer_features(layer_name="Demo_countries")
+viz.plot_layer(layer)
 
-layer.head()
-
-# #### Plot available geometries
-#
-# This requires installation of library to visualize geospatial data. Here, we use Folium.
-
-poly_map = folium.Map(tiles="cartodbpositron")
-for _, geometry in layer["geometry"].items():
-    folium.GeoJson(geometry).add_to(poly_map)
-folium.LatLngPopup().add_to(poly_map)
-poly_map.fit_bounds(poly_map.get_bounds())
-poly_map
+viz.plot_layers(layer)
 
 # ### Miscellaneous
 
