@@ -7,7 +7,6 @@ name = "sensingcluespy"
 authors = [
     {name = "sensing_clues", email = "sensingclues@typemail.com"},
 ]
-version = "0.2.3"
 description = "Python client to extract data from SensingClues"
 readme = "readme.md"
 requires-python = ">=3.9"
@@ -26,6 +25,7 @@ Homepage = "https://sensingcluespy.readthedocs.io/en/latest/index.html"
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
 optional-dependencies.dev = { file = ["requirements_dev.txt"] }
+version = {attr = "sensingcluespy.__version__"}
 
 [tool.setuptools.package-data]
 sensingclues = ["extractors/*"]
@@ -46,26 +46,3 @@ extend-exclude = '''
 
 [tool.isort]
 profile = "black"
-
-[tool.bumpver]
-current_version = "0.2.3"
-version_pattern = "MAJOR.MINOR.PATCH[-TAG]"
-commit_message = "bump version {old_version} -> {new_version}"
-tag_message = "{new_version}"
-tag_scope = "default"
-pre_commit_hook = ""
-post_commit_hook = ""
-commit = true
-tag = true
-push = true
-
-[tool.bumpver.file_patterns]
-"pyproject.toml" = [
-    'current_version = "{version}"',
-    'version = "{version}"',
-]
-"docs/conf.py" = [
-    'release = "{version}"',
-]
-
-
