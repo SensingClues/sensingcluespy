@@ -1,5 +1,9 @@
-geojson
-geopandas
-pandas
-python-dotenv
-requests
+folium==0.16.0
+geojson==2.5.0
+geopandas==0.12.1
+jupyterlab==4.2.5
+jupytext==1.16.4
+matplotlib==3.9.0
+pandas==1.5.1
+python-dotenv==0.21.0
+requests==2.23.2
