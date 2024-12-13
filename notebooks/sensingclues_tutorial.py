@@ -54,7 +54,7 @@ import os
 from dotenv import load_dotenv
 
 from sensingcluespy import sclogging
-from sensingcluespy.api_calls import SensingClues
+from sensingcluespy.sensingclues_api import SensingClues
 from sensingcluespy.src import helper_functions as helpers
 from sensingcluespy.src import visualization as viz
 # -
