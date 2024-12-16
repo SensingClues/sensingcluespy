@@ -111,21 +111,20 @@ events = sc_io.get_events(groups=groups)
 
 events.info()
 
-
-
-# # WORK IN PROGRESS FROM HERE
-
 # ### By `event_ids`
 # Use this approach to download an individual `Event` if you know its id. Downloading from multiple ids at once is currently unsupported in ER.
 
-er_io.get_events(
-    event_ids="855903a6-dfab-4b91-b75d-c993bea1208d",  # Elephant sighting event
+sc_io.get_events(
+    event_ids="O3494596-nff20c1dac0817042",  # Elephant sighting event
+    groups=groups,
 )
+
+# # WORK IN PROGRESS FROM HERE
 
 # ### By `event_type`
 # Use this approach if you want to download events of a given event type (using the EventType ID from ER)
 
-df_event_types = pd.DataFrame(er_io.get_event_types())
+df_event_types = pd.DataFrame(sc_io.get_event_types())
 mep_elephant_sighting_id = df_event_types[df_event_types["value"] == "mep_elephant_sighting"]["id"].values[0]
 mep_elephant_sighting_id
 

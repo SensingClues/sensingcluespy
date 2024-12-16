@@ -30,6 +30,10 @@ class SensingCluesEcoscope(object):
     def get_events(
         self,
         groups: Union[str, List],
+        event_ids: str = None,
+        event_type: list = None,
+        since: str = None,
+        until: str = None,
         include_subconcepts: bool = True,
         **kwargs,
     ) -> gpd.GeoDataFrame:
@@ -54,10 +58,19 @@ class SensingCluesEcoscope(object):
             query parameters specified in kwargs (if any).
         """
 
+        query_text = None
+        # Filter on eventId if it is given
+        if event_ids is not None:
+            query_text = f"entityId: '{event_ids}'"
+
         events = self.sc.get_observations(
             groups=groups,
             include_subconcepts=include_subconcepts,
+            query_text=query_text,
             **kwargs,
         )
 
         return events
+
+    def get_event_types():
+        pass
